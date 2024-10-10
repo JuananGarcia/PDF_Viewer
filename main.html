@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restricted PDF Viewer</title>
+    <style>
+        /* Estilos para deshabilitar acciones del usuario */
+        body {
+            user-select: none; /* Evitar selección de texto */
+            margin: 0;
+            padding: 0;
+        }
+
+        .pdf-page {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* Capa transparente para bloquear interacciones */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0); /* div transparente */
+        }
+
+        /* Opcional: deshabilitar clic derecho en toda la página */
+        body {
+            -webkit-touch-callout: none; /* iOS Safari */
+            -webkit-user-select: none; /* Safari */
+            -khtml-user-select: none; /* Konqueror HTML */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version */
+        }
+    </style>
+</head>
+<body>
+    <h2>Restricted PDF Viewer</h2>
+    <!-- Contenedor para todas las páginas del PDF -->
+    <div id="pdf-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <script>
+        const url = "pdfs/ActaSubrogacion.pdf"; // Reemplaza con la ruta correcta de tu PDF
+        console.log(url);
+        // Configurar el visor PDF.js
+        const container = document.getElementById('pdf-container');
+
+        // Cargar el PDF
+        const loadingTask = pdfjsLib.getDocument(url);
+        loadingTask.promise.then(function(pdf) {
+            const totalPages = pdf.numPages;
+
+            // Recorrer todas las páginas
+            for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+                // Obtener y renderizar cada página
+                pdf.getPage(pageNum).then(function(page) {
+                    const viewport = page.getViewport({ scale: 1.5 });
+
+                    // Crear un contenedor para cada página
+                    const pageContainer = document.createElement('div');
+                    pageContainer.className = 'pdf-page';
+                    pageContainer.style.position = 'relative';
+                    
+                    // Crear el lienzo para la página
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    pageContainer.appendChild(canvas);
+
+                    // Añadir el overlay transparente
+                    const overlay = document.createElement('div');
+                    overlay.className = 'overlay';
+                    pageContainer.appendChild(overlay);
+
+                    // Renderizar la página en el canvas
+                    const renderContext = {
+                        canvasContext: context,
+                        viewport: viewport
+                    };
+                    page.render(renderContext);
+
+                    // Añadir el contenedor de la página al contenedor principal
+                    container.appendChild(pageContainer);
+                });
+            }
+        });
+
+        // Deshabilitar funciones de impresión y otras acciones comunes
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey && (event.key === 'p' || event.key === 's')) {
+                event.preventDefault();
+            }
+        });
+
+        // Deshabilitar el clic derecho en toda la página
+        
+    </script>
+</body>
+</html>
