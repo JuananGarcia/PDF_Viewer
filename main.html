@@ -105,6 +105,9 @@
         });
 
         // Deshabilitar el clic derecho en toda la página
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
         
     </script>
 </body>
